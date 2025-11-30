@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Bill App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="auth-container">
+        <div id="login-form" class="auth-box">
+            <h1 class="auth-title">Electric Bill</h1>
+            <p class="auth-subtitle">Create account or <span onclick="toggleAuth('login')">Log-in</span></p>
+            
+            <form id="form-login">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="edgaranthony26@gmail.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" placeholder="• • • • • • • •" required>
+                </div>
+                <a href="#" class="forgot-pass">Forgot Password?</a>
+                
+                <button type="submit" class="btn-auth btn-black">Log in</button>
+                <button type="button" class="btn-auth btn-google"><i class="fab fa-google"></i> Log in with Google</button>
+                <button type="button" class="btn-auth btn-fb"><i class="fab fa-facebook-f"></i> Log in with Facebook</button>
+                
+                <p style="margin-top: 20px; font-size: 0.9rem;">Don't have an account? <span onclick="toggleAuth('signup')" style="cursor: pointer; color: blue; font-weight: bold;">Sign Up</span></p>
+            </form>
+        </div>
+
+        <!-- SIGNUP FORM (Hidden by default) -->
+        <div id="signup-form" class="auth-box" style="display: none;">
+            <h1 class="auth-title">Electric Bill</h1>
+            <p class="auth-subtitle">Start tracking your expenses</p>
+            
+            <form id="form-signup">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signup-name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="signup-email" placeholder="email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signup-pass" placeholder="Create a password" required>
+                </div>
+                
+                <button type="submit" class="btn-auth btn-black">Create Account</button>
+                
+                <p style="margin-top: 20px; font-size: 0.9rem;">Already have an account? <span onclick="toggleAuth('login')" style="cursor: pointer; color: blue; font-weight: bold;">Log In</span></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-lightbulb"></i>
+                Electricity Bill
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="navigate('dashboard')">
+                    <i class="fas fa-home"></i> Dashboard
+                </li>
+                <li class="nav-item" onclick="navigate('generate')">
+                    <i class="fas fa-file-invoice-dollar"></i> Generate Bill
+                </li>
+                <li class="nav-item" onclick="navigate('result')">
+                    <i class="fas fa-list-alt"></i> Result
+                </li>
+                <li class="nav-item" onclick="navigate('profile')">
+                    <i class="fas fa-user"></i> Profile
+                </li>
+            </ul>
+            <button class="btn-logout" onclick="logout()">Log out</button>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-header">
+                    <span id="breadcrumb">Pages / Dashboard</span>
+                    <h2 id="page-title">Main Dashboard</h2>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search" style="color: #999;"></i>
+                        <input type="text" placeholder="Search">
+                    </div>
+                    <div class="user-mini-profile">
+                        <img src="https://i.pravatar.cc/150?img=12" alt="User" id="header-avatar">
+                    </div>
+                </div>
+            </div>
+            <section id="view-dashboard" class="view-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <h3 id="dash-consumption">0 kWh</h3>
+                            <span class="text-light">Total Consumption</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <h3 id="dash-paid">₱ 0.00</h3>
+                            <span class="text-light">Total Paid</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
+                        <div>
+                            <h3 id="dash-bills">0</h3>
+                            <span class="text-light">Bills Generated</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="consumptionChart"></canvas>
+                </div>
+            </section>
+            <section id="view-generate" class="view-section">
+                <div class="bill-card fade-in">
+                    <div class="bill-header">
+                        Calculate Bill
+                    </div>
+                    <div class="bill-body">
+                        <form id="calc-form">
+                            <div class="form-group">
+                                <label>Consumption (kWh)</label>
+                                <input type="number" id="input-kwh" placeholder="e.g. 150" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cost per kWh (₱)</label>
+                                <input type="number" id="input-rate" value="12.50" readonly style="background-color: #eee;">
+                            </div>
+                            <button type="submit" class="btn-auth btn-black" style="width: auto; padding: 10px 30px;">Calculate</button>
+                        </form>
+
+                        <div id="bill-result" class="result-box">
+                            <h3 style="color: var(--text-light); margin-bottom: 10px;">Total Amount Due</h3>
+                            <h1 style="color: var(--primary-blue); font-size: 2.5rem;" id="display-amount">₱ 0.00</h1>
+                            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                                <button class="btn-auth btn-black" style="width: auto;" onclick="saveBill()">Save to Results</button>
+                                <button class="btn-auth" style="width: auto; background-color: var(--success);" onclick="downloadCurrentReceipt()">Download Receipt</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="view-result" class="view-section">
+                <div class="bill-card fade-in">
+                    <div class="bill-header">Payment History</div>
+                    <div style="padding: 0;">
+                        <table id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Consumption</th>
+                                    <th>Rate</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Download</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <section id="view-profile" class="view-section">
+                <div class="profile-container fade-in">
+                    <div class="profile-header-bg">
+                        <h3>Your profile</h3>
+                        <div class="avatar-wrapper" id="profile-avatar-wrapper">
+                            <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-avatar-large" id="profile-avatar-img">
+                            <div class="avatar-overlay" onclick="triggerImageUpload()">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <input type="file" id="file-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(this)">
+                        </div>
+                    </div>
+                    <div class="profile-content">
+                        <div class="profile-details-grid">
+                            <div class="profile-label">Name:</div>
+                            <input type="text" class="profile-input" id="profile-name-input" disabled>
+
+                            <div class="profile-label">Address:</div>
+                            <input type="text" class="profile-input" id="profile-address-input" value="Purok 2 Punta Silum Manticao Mis. Or." disabled>
+
+                            <div class="profile-label">Phone:</div>
+                            <input type="text" class="profile-input" id="profile-phone-input" value="09616678474" disabled>
+
+                            <div class="profile-label">Email:</div>
+                            <input type="email" class="profile-input" id="profile-email-input" disabled>
+
+                            <div class="profile-label">Password:</div>
+                            <input type="password" class="profile-input" value="********" disabled>
+                        </div>
+                        <button class="btn-edit-profile" id="btn-edit-toggle" onclick="toggleEditProfile()">Edit</button>
+                        <button class="btn-edit-profile btn-save-profile" id="btn-save-changes" onclick="saveProfileChanges()">Save Changes</button>
+                        <div style="clear: both;"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="receipt-modal">
+        <div id="receipt-content" class="receipt-content">
+        </div>
+        <button class="no-print btn-auth" style="position: fixed; top: 20px; right: 20px; width: auto; background: var(--danger); color: white;" onclick="closeReceiptModal()">Close</button>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
